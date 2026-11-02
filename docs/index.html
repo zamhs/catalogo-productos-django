@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo de Productos - Django (Evidencia 3)</title>
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <style>
+    :root {
+      --primary-color: #1f4e79;
+      --secondary-color: #2b5b84;
+      --accent-color: #f9aa33;
+      --bg-light: #f8fafc;
+    }
+    body {
+      background-color: var(--bg-light);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .navbar-custom {
+      background: linear-gradient(135deg, #16324f, #1f4e79);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .navbar-brand {
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .stat-card {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 1.25rem;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    }
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+    .table-card {
+      background: #ffffff;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+    .badge-category {
+      font-size: 0.8rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      font-weight: 600;
+      background-color: #e2e8f0;
+      color: #334155;
+    }
+    footer {
+      margin-top: auto;
+      background-color: #1e293b;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navegación -->
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+        <i class="fa-solid fa-boxes-stacked text-warning"></i>
+        <span>Catálogo de Productos</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active fw-bold" href="#catalogo">
+              <i class="fa-solid fa-list me-1"></i> Productos
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#modalNuevoProducto">
+              <i class="fa-solid fa-plus-circle me-1"></i> Nuevo Producto
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#modalCategorias">
+              <i class="fa-solid fa-tags me-1"></i> Categorías
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="https://github.com/zamhs/catalogo-productos-django" target="_blank">
+              <i class="fa-brands fa-github me-1 text-info"></i> Repositorio GitHub
+            </a>
+          </li>
+        </ul>
+
+        <div class="d-flex align-items-center text-white-50 small">
+          <span class="badge bg-light text-dark me-2">Evidencia 3</span>
+          <span>César Reyes (2089628) &middot; Gpo 52</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Banner Informativo -->
+  <div class="container mt-3">
+    <div class="alert alert-info d-flex align-items-center justify-content-between flex-wrap gap-2 shadow-sm" role="alert">
+      <div>
+        <i class="fa-solid fa-server me-2 text-primary"></i>
+        <strong>Proyecto Django en Producción:</strong> Demostración web interactiva del Catálogo con arquitectura <strong>MVT</strong>, búsqueda <code>icontains</code>, ordenamiento y agregaciones ORM.
+      </div>
+      <div>
+        <a href="https://github.com/zamhs/catalogo-productos-django" target="_blank" class="btn btn-sm btn-dark">
+          <i class="fa-brands fa-github me-1"></i> Ver Código Fuente Django
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido Principal -->
+  <main class="container my-4" id="catalogo">
+
+    <!-- Fase 9: Tarjetas de Estadísticas del Inventario -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-sm-6">
+        <div class="stat-card d-flex align-items-center">
+          <div class="stat-icon bg-primary-subtle text-primary me-3">
+            <i class="fa-solid fa-boxes-stacked"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold">TOTAL PRODUCTOS</div>
+            <div class="fs-4 fw-bold text-dark" id="stat-total">17</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <div class="stat-card d-flex align-items-center">
+          <div class="stat-icon bg-success-subtle text-success me-3">
+            <i class="fa-solid fa-cubes"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold">EXISTENCIAS TOTALES</div>
+            <div class="fs-4 fw-bold text-dark" id="stat-existencias">247 <small class="fs-6 text-muted">pzas</small></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <div class="stat-card d-flex align-items-center">
+          <div class="stat-icon bg-warning-subtle text-warning me-3">
+            <i class="fa-solid fa-sack-dollar"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold">VALOR DEL INVENTARIO</div>
+            <div class="fs-4 fw-bold text-dark" id="stat-valor">$418,978.00</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <div class="stat-card d-flex align-items-center">
+          <div class="stat-icon bg-info-subtle text-info me-3">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold">PRECIO PROMEDIO</div>
+            <div class="fs-4 fw-bold text-dark" id="stat-promedio">$2,168.06</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barra de Herramientas: Búsqueda, Filtro y Ordenamiento -->
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-body p-3">
+        <div class="row g-2 align-items-center">
+          
+          <!-- Fase 7: Caja de Búsqueda icontains -->
+          <div class="col-lg-4 col-md-5">
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted border-end-0">
+                <i class="fa-solid fa-magnifying-glass"></i>
+              </span>
+              <input type="text" id="txtBuscar" class="form-control border-start-0" 
+                     placeholder="Buscar por nombre (ej. Laptop)..." oninput="filtrarProductos()">
+            </div>
+          </div>
+
+          <!-- Filtro por Categoría -->
+          <div class="col-lg-3 col-md-3 col-sm-6">
+            <select id="selCategoria" class="form-select" onchange="filtrarProductos()">
+              <option value="">Todas las categorías</option>
+              <option value="Cómputo">Cómputo</option>
+              <option value="Electrónica">Electrónica</option>
+              <option value="Hogar">Hogar</option>
+              <option value="Deportes">Deportes</option>
+              <option value="Papelería">Papelería</option>
+            </select>
+          </div>
+
+          <!-- Fase 8: Selector de Ordenamiento -->
+          <div class="col-lg-3 col-md-4 col-sm-6">
+            <select id="selOrden" class="form-select" onchange="filtrarProductos()">
+              <option value="reciente">Más recientes primero</option>
+              <option value="nombre_asc">Nombre (A - Z)</option>
+              <option value="nombre_desc">Nombre (Z - A)</option>
+              <option value="precio_asc">Precio: Menor a Mayor</option>
+              <option value="precio_desc">Precio: Mayor a Menor</option>
+              <option value="existencias_asc">Existencias: Menor a Mayor</option>
+              <option value="existencias_desc">Existencias: Mayor a Menor</option>
+            </select>
+          </div>
+
+          <!-- Botón de Limpiar -->
+          <div class="col-lg-2 col-md-12 d-flex gap-2 justify-content-end">
+            <button class="btn btn-outline-secondary w-100" onclick="limpiarFiltros()">
+              <i class="fa-solid fa-rotate-left me-1"></i> Limpiar
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Encabezado de la Tabla -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h4 class="mb-0 fw-bold text-dark">
+          <i class="fa-solid fa-box-open text-primary me-2"></i>Catálogo de Productos
+        </h4>
+        <small class="text-muted" id="contador-productos">Mostrando 17 de 17 productos</small>
+      </div>
+      <button class="btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#modalNuevoProducto">
+        <i class="fa-solid fa-plus-circle me-1"></i> Registrar Producto
+      </button>
+    </div>
+
+    <!-- Tabla de Productos -->
+    <div class="table-card">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light text-uppercase small text-muted">
+            <tr>
+              <th style="width: 60px;">ID</th>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th class="text-end">Precio</th>
+              <th class="text-center">Existencias</th>
+              <th class="text-end">Valor Total</th>
+              <th>Fecha Registro</th>
+              <th class="text-center" style="width: 140px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-body">
+            <!-- Renderizado dinámico con JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modal Nuevo Producto -->
+  <div class="modal fade" id="modalNuevoProducto" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="fa-solid fa-circle-plus me-2"></i>Registrar Producto (ModelForm)</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="formNuevoProducto" onsubmit="agregarProductoDemo(event)">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Nombre del Producto *</label>
+              <input type="text" id="n_nombre" class="form-control" placeholder="Ej. Smart TV 55 Pulgadas" required>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label fw-semibold">Categoría *</label>
+                <select id="n_categoria" class="form-select" required>
+                  <option value="Cómputo">Cómputo</option>
+                  <option value="Electrónica">Electrónica</option>
+                  <option value="Hogar">Hogar</option>
+                  <option value="Deportes">Deportes</option>
+                  <option value="Papelería">Papelería</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold">Precio ($) *</label>
+                <input type="number" id="n_precio" class="form-control" placeholder="0.00" step="0.01" min="1" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Existencias en Inventario *</label>
+              <input type="number" id="n_existencias" class="form-control" placeholder="0" min="0" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Descripción</label>
+              <textarea id="n_desc" class="form-control" rows="2" placeholder="Detalles del producto..."></textarea>
+            </div>
+            <div class="d-flex justify-content-end gap-2">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary fw-semibold">Guardar Producto</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Categorías -->
+  <div class="modal fade" id="modalCategorias" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title"><i class="fa-solid fa-tags me-2"></i>Módulo de Categorías (Fase 2)</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="table-responsive">
+            <table class="table table-bordered mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>#1</td>
+                  <td><strong>Cómputo</strong></td>
+                  <td>Equipos de cómputo, laptops, servidores y componentes de procesamiento.</td>
+                </tr>
+                <tr>
+                  <td>#2</td>
+                  <td><strong>Electrónica</strong></td>
+                  <td>Dispositivos electrónicos, pantallas, monitores, audio y video.</td>
+                </tr>
+                <tr>
+                  <td>#3</td>
+                  <td><strong>Hogar</strong></td>
+                  <td>Artículos para el hogar, electrodomésticos, iluminación y climatización.</td>
+                </tr>
+                <tr>
+                  <td>#4</td>
+                  <td><strong>Deportes</strong></td>
+                  <td>Artículos deportivos, accesorios de entrenamiento y acondicionamiento físico.</td>
+                </tr>
+                <tr>
+                  <td>#5</td>
+                  <td><strong>Papelería</strong></td>
+                  <td>Materiales de oficina, consumibles de impresión, papel y papelería comercial.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pie de Página -->
+  <footer class="py-4 text-center mt-5">
+    <div class="container">
+      <p class="mb-1 fw-bold text-light">Laboratorio: Catálogo de Productos con Django (Arquitectura MVT)</p>
+      <p class="mb-1 small">Universidad Autónoma de Nuevo León (UANL) &middot; FACPYA &middot; Fundamentos de Desarrollo Web</p>
+      <p class="mb-0 small text-white-50">Estudiante: <strong>César Enrique Reyes Zamora</strong> &middot; Matrícula: <strong>2089628</strong> &middot; Grupo: <strong>52</strong></p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap 5 Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Lógica Dinámica de Demostración -->
+  <script>
+    let productos = [
+      { id: 1, nombre: 'Laptop HP 15-dy2061la', desc: 'Intel Core i5, 8GB RAM, 512GB SSD', cat: 'Cómputo', precio: 15000.00, stock: 12, fecha: '01/11/2026' },
+      { id: 2, nombre: 'Teclado Logitech G213 Prodigy', desc: 'Teclado RGB mech-dome para juegos', cat: 'Cómputo', precio: 450.00, stock: 25, fecha: '01/11/2026' },
+      { id: 3, nombre: 'Mouse Inalámbrico Logitech M185', desc: 'Óptico inalámbrico 2.4 GHz', cat: 'Cómputo', precio: 299.00, stock: 30, fecha: '01/11/2026' },
+      { id: 4, nombre: 'Disco Sólido Kingston NV2 1TB', desc: 'SSD M.2 PCIe 4.0 NVMe', cat: 'Cómputo', precio: 1350.00, stock: 18, fecha: '01/11/2026' },
+      { id: 5, nombre: 'Monitor Samsung 27 Curvo', desc: 'Full HD 75Hz panel VA FreeSync', cat: 'Electrónica', precio: 3500.00, stock: 10, fecha: '01/11/2026' },
+      { id: 6, nombre: 'Impresora Epson EcoTank L3250', desc: 'Multifuncional tanque continuo Wi-Fi', cat: 'Electrónica', precio: 4200.00, stock: 8, fecha: '01/11/2026' },
+      { id: 7, nombre: 'Audífonos Bluetooth Sony WH-CH520', desc: 'Inalámbricos con hasta 50h de batería', cat: 'Electrónica', precio: 899.00, stock: 15, fecha: '01/11/2026' },
+      { id: 8, nombre: 'Bocina Inteligente Amazon Echo Dot 5ta', desc: 'Altavoz con Alexa integrada', cat: 'Electrónica', precio: 999.00, stock: 14, fecha: '01/11/2026' },
+      { id: 9, nombre: 'Cafetera Programable Oster 12 Tazas', desc: 'Filtro permanente y jarra de vidrio', cat: 'Hogar', precio: 850.00, stock: 16, fecha: '01/11/2026' },
+      { id: 10, nombre: 'Freidora de Aire Ninja 4 Litros', desc: 'Freidora digital 4 funciones', cat: 'Hogar', precio: 2100.00, stock: 9, fecha: '01/11/2026' },
+      { id: 11, nombre: 'Aspiradora Robot Xiaomi Vacuum E10', desc: 'Aspirador y trapeador 4000Pa', cat: 'Hogar', precio: 3800.00, stock: 6, fecha: '01/11/2026' },
+      { id: 12, nombre: 'Mancuernas Ajustables 20kg Kit', desc: 'Discos de hierro fundido con extensor', cat: 'Deportes', precio: 1200.00, stock: 11, fecha: '01/11/2026' },
+      { id: 13, nombre: 'Tapete para Yoga Antideslizante 6mm', desc: 'Material TPE ecológico con correa', cat: 'Deportes', precio: 420.00, stock: 22, fecha: '01/11/2026' },
+      { id: 14, nombre: 'Cuerda para Saltar Alta Velocidad', desc: 'Cable de acero con baleros 360', cat: 'Deportes', precio: 190.00, stock: 35, fecha: '01/11/2026' },
+      { id: 15, nombre: 'Caja Papel Bond Xerox Carta 5000', desc: '10 paquetes de 500 hojas 75g', cat: 'Papelería', precio: 980.00, stock: 20, fecha: '01/11/2026' },
+      { id: 16, nombre: 'Paquete Bolígrafos Bic Cristal 12pz', desc: 'Punto mediano 1.0mm color azul', cat: 'Papelería', precio: 95.00, stock: 50, fecha: '01/11/2026' },
+      { id: 17, nombre: 'Engrapadora de Uso Rudo Bostitch', desc: 'Metálica capacidad 60 hojas', cat: 'Papelería', precio: 380.00, stock: 14, fecha: '01/11/2026' }
+    ];
+
+    function renderTabla(lista) {
+      const tbody = document.getElementById('tabla-body');
+      tbody.innerHTML = '';
+
+      if (lista.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-5 text-muted">No se encontraron productos coincidentes.</td></tr>`;
+        return;
+      }
+
+      lista.forEach(p => {
+        const total = (p.precio * p.stock).toFixed(2);
+        let stockBadge = p.stock > 10 
+          ? `<span class="badge bg-success-subtle text-success px-2 py-1"><i class="fa-solid fa-check me-1"></i>${p.stock} en stock</span>`
+          : p.stock > 0
+          ? `<span class="badge bg-warning-subtle text-warning px-2 py-1"><i class="fa-solid fa-triangle-exclamation me-1"></i>${p.stock} (Bajo)</span>`
+          : `<span class="badge bg-danger-subtle text-danger px-2 py-1"><i class="fa-solid fa-ban me-1"></i>Agotado</span>`;
+
+        tbody.innerHTML += `
+          <tr>
+            <td class="text-muted fw-bold">#${p.id}</td>
+            <td>
+              <div class="fw-bold text-dark">${p.nombre}</div>
+              <small class="text-muted">${p.desc}</small>
+            </td>
+            <td><span class="badge-category"><i class="fa-solid fa-tag me-1 text-primary"></i>${p.cat}</span></td>
+            <td class="text-end fw-bold text-dark">$${p.precio.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+            <td class="text-center">${stockBadge}</td>
+            <td class="text-end text-muted">$${parseFloat(total).toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+            <td class="small text-muted">${p.fecha}</td>
+            <td class="text-center">
+              <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-primary" onclick="alert('Ruta Django: /productos/editar/${p.id}/')"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button class="btn btn-outline-danger" onclick="eliminarProductoDemo(${p.id})"><i class="fa-solid fa-trash-can"></i></button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+      document.getElementById('contador-productos').innerText = `Mostrando ${lista.length} de ${productos.length} productos`;
+      actualizarEstadisticas();
+    }
+
+    function filtrarProductos() {
+      const q = document.getElementById('txtBuscar').value.toLowerCase().trim();
+      const cat = document.getElementById('selCategoria').value;
+      const orden = document.getElementById('selOrden').value;
+
+      let res = productos.filter(p => {
+        const coincideNombre = p.nombre.toLowerCase().includes(q);
+        const coincideCat = cat === '' || p.cat === cat;
+        return coincideNombre && coincideCat;
+      });
+
+      if (orden === 'nombre_asc') res.sort((a,b) => a.nombre.localeCompare(b.nombre));
+      if (orden === 'nombre_desc') res.sort((a,b) => b.nombre.localeCompare(a.nombre));
+      if (orden === 'precio_asc') res.sort((a,b) => a.precio - b.precio);
+      if (orden === 'precio_desc') res.sort((a,b) => b.precio - a.precio);
+      if (orden === 'existencias_asc') res.sort((a,b) => a.stock - b.stock);
+      if (orden === 'existencias_desc') res.sort((a,b) => b.stock - a.stock);
+
+      renderTabla(res);
+    }
+
+    function limpiarFiltros() {
+      document.getElementById('txtBuscar').value = '';
+      document.getElementById('selCategoria').value = '';
+      document.getElementById('selOrden').value = 'reciente';
+      renderTabla(productos);
+    }
+
+    function eliminarProductoDemo(id) {
+      if (confirm('¿Eliminar producto #' + id + ' del catálogo?')) {
+        productos = productos.filter(p => p.id !== id);
+        filtrarProductos();
+      }
+    }
+
+    function agregarProductoDemo(e) {
+      e.preventDefault();
+      const nuevo = {
+        id: productos.length ? Math.max(...productos.map(p => p.id)) + 1 : 1,
+        nombre: document.getElementById('n_nombre').value,
+        desc: document.getElementById('n_desc').value || 'Sin descripción',
+        cat: document.getElementById('n_categoria').value,
+        precio: parseFloat(document.getElementById('n_precio').value),
+        stock: parseInt(document.getElementById('n_existencias').value),
+        fecha: '01/11/2026'
+      };
+      productos.unshift(nuevo);
+      bootstrap.Modal.getInstance(document.getElementById('modalNuevoProducto')).hide();
+      document.getElementById('formNuevoProducto').reset();
+      filtrarProductos();
+    }
+
+    function actualizarEstadisticas() {
+      const totalProds = productos.length;
+      const totalExist = productos.reduce((acc, p) => acc + p.stock, 0);
+      const valorTotal = productos.reduce((acc, p) => acc + (p.precio * p.stock), 0);
+      const promPrecio = totalProds ? (productos.reduce((acc, p) => acc + p.precio, 0) / totalProds) : 0;
+
+      document.getElementById('stat-total').innerText = totalProds;
+      document.getElementById('stat-existencias').innerHTML = `${totalExist} <small class="fs-6 text-muted">pzas</small>`;
+      document.getElementById('stat-valor').innerText = `$${valorTotal.toLocaleString('es-MX', {minimumFractionDigits: 2})}`;
+      document.getElementById('stat-promedio').innerText = `$${promPrecio.toLocaleString('es-MX', {minimumFractionDigits: 2})}`;
+    }
+
+    // Inicialización
+    renderTabla(productos);
+  </script>
+</body>
+</html>

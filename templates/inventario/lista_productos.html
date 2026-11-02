@@ -1,0 +1,215 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Catálogo de Productos - Lista General{% endblock %}
+
+{% block content %}
+
+<!-- Fase 9: Tarjetas de Estadísticas del Inventario -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3 col-sm-6">
+    <div class="stat-card d-flex align-items-center">
+      <div class="stat-icon bg-primary-subtle text-primary me-3">
+        <i class="fa-solid fa-boxes-stacked"></i>
+      </div>
+      <div>
+        <div class="text-muted small fw-semibold">TOTAL PRODUCTOS</div>
+        <div class="fs-4 fw-bold text-dark">{{ total_productos }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3 col-sm-6">
+    <div class="stat-card d-flex align-items-center">
+      <div class="stat-icon bg-success-subtle text-success me-3">
+        <i class="fa-solid fa-cubes"></i>
+      </div>
+      <div>
+        <div class="text-muted small fw-semibold">EXISTENCIAS TOTALES</div>
+        <div class="fs-4 fw-bold text-dark">{{ total_existencias }} <small class="fs-6 text-muted">pzas</small></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3 col-sm-6">
+    <div class="stat-card d-flex align-items-center">
+      <div class="stat-icon bg-warning-subtle text-warning me-3">
+        <i class="fa-solid fa-sack-dollar"></i>
+      </div>
+      <div>
+        <div class="text-muted small fw-semibold">VALOR DEL INVENTARIO</div>
+        <div class="fs-4 fw-bold text-dark">${{ valor_inventario|floatformat:2 }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3 col-sm-6">
+    <div class="stat-card d-flex align-items-center">
+      <div class="stat-icon bg-info-subtle text-info me-3">
+        <i class="fa-solid fa-chart-line"></i>
+      </div>
+      <div>
+        <div class="text-muted small fw-semibold">PRECIO PROMEDIO</div>
+        <div class="fs-4 fw-bold text-dark">${{ precio_promedio|floatformat:2 }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Barra de Herramientas: Búsqueda, Filtro y Ordenamiento -->
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-body p-3">
+    <form method="GET" action="{% url 'lista_productos' %}" class="row g-2 align-items-center">
+      
+      <!-- Fase 7: Caja de Búsqueda icontains -->
+      <div class="col-lg-4 col-md-5">
+        <div class="input-group">
+          <span class="input-group-text bg-light text-muted border-end-0">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </span>
+          <input type="text" name="buscar" class="form-control border-start-0" 
+                 placeholder="Buscar producto por nombre (ej. Laptop)..." 
+                 value="{{ texto_busqueda }}">
+        </div>
+      </div>
+
+      <!-- Filtro por Categoría -->
+      <div class="col-lg-3 col-md-3 col-sm-6">
+        <select name="categoria" class="form-select">
+          <option value="">Todas las categorías</option>
+          {% for cat in categorias %}
+            <option value="{{ cat.id }}" {% if categoria_seleccionada == cat.id|stringformat:"s" %}selected{% endif %}>
+              {{ cat.nombre }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Fase 8: Selector de Ordenamiento -->
+      <div class="col-lg-3 col-md-4 col-sm-6">
+        <select name="orden" class="form-select">
+          <option value="-fecha_registro" {% if orden_seleccionado == '-fecha_registro' %}selected{% endif %}>Más recientes primero</option>
+          <option value="nombre" {% if orden_seleccionado == 'nombre' %}selected{% endif %}>Nombre (A - Z)</option>
+          <option value="-nombre" {% if orden_seleccionado == '-nombre' %}selected{% endif %}>Nombre (Z - A)</option>
+          <option value="precio" {% if orden_seleccionado == 'precio' %}selected{% endif %}>Precio: Menor a Mayor</option>
+          <option value="-precio" {% if orden_seleccionado == '-precio' %}selected{% endif %}>Precio: Mayor a Menor</option>
+          <option value="existencias" {% if orden_seleccionado == 'existencias' %}selected{% endif %}>Existencias: Menor a Mayor</option>
+          <option value="-existencias" {% if orden_seleccionado == '-existencias' %}selected{% endif %}>Existencias: Mayor a Menor</option>
+        </select>
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="col-lg-2 col-md-12 d-flex gap-2 justify-content-end">
+        <button type="submit" class="btn btn-primary flex-grow-1">
+          <i class="fa-solid fa-filter me-1"></i> Filtrar
+        </button>
+        {% if texto_busqueda or categoria_seleccionada or orden_seleccionado != '-fecha_registro' %}
+          <a href="{% url 'lista_productos' %}" class="btn btn-outline-secondary" title="Limpiar Filtros">
+            <i class="fa-solid fa-rotate-left"></i>
+          </a>
+        {% endif %}
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<!-- Encabezado de la Tabla y Botón de Nuevo Producto -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h4 class="mb-0 fw-bold text-dark">
+      <i class="fa-solid fa-box-open text-primary me-2"></i>Catálogo de Productos
+    </h4>
+    <small class="text-muted">
+      Mostrando <strong>{{ productos|length }}</strong> de <strong>{{ total_productos }}</strong> productos registrados
+      {% if texto_busqueda %} para la búsqueda <em>"{{ texto_busqueda }}"</em>{% endif %}
+    </small>
+  </div>
+  <a href="{% url 'crear_producto' %}" class="btn btn-success shadow-sm">
+    <i class="fa-solid fa-plus-circle me-1"></i> Registrar Producto
+  </a>
+</div>
+
+<!-- Tabla de Productos -->
+<div class="table-card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light text-uppercase small text-muted">
+        <tr>
+          <th style="width: 60px;">ID</th>
+          <th>Producto</th>
+          <th>Categoría</th>
+          <th class="text-end">Precio</th>
+          <th class="text-center">Existencias</th>
+          <th class="text-end">Valor Total</th>
+          <th>Fecha Registro</th>
+          <th class="text-center" style="width: 140px;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for producto in productos %}
+        <tr>
+          <td class="text-muted fw-bold">#{{ producto.id }}</td>
+          <td>
+            <div class="fw-bold text-dark">{{ producto.nombre }}</div>
+            {% if producto.descripcion %}
+              <small class="text-muted">{{ producto.descripcion|truncatewords:8 }}</small>
+            {% endif %}
+          </td>
+          <td>
+            <span class="badge-category">
+              <i class="fa-solid fa-tag me-1 text-primary"></i>{{ producto.categoria.nombre }}
+            </span>
+          </td>
+          <td class="text-end fw-bold text-dark fs-6">
+            ${{ producto.precio|floatformat:2 }}
+          </td>
+          <td class="text-center">
+            {% if producto.existencias > 10 %}
+              <span class="badge bg-success-subtle text-success px-2 py-1">
+                <i class="fa-solid fa-check me-1"></i>{{ producto.existencias }} en stock
+              </span>
+            {% elif producto.existencias > 0 %}
+              <span class="badge bg-warning-subtle text-warning px-2 py-1">
+                <i class="fa-solid fa-triangle-exclamation me-1"></i>{{ producto.existencias }} (Bajo)
+              </span>
+            {% else %}
+              <span class="badge bg-danger-subtle text-danger px-2 py-1">
+                <i class="fa-solid fa-ban me-1"></i>Agotado
+              </span>
+            {% endif %}
+          </td>
+          <td class="text-end text-muted">
+            ${{ producto.valor_total|floatformat:2 }}
+          </td>
+          <td class="small text-muted">
+            {{ producto.fecha_registro|date:"d/m/Y H:i" }}
+          </td>
+          <td class="text-center">
+            <div class="btn-group btn-group-sm">
+              <a href="{% url 'editar_producto' producto.id %}" class="btn btn-outline-primary" title="Editar Producto">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </a>
+              <a href="{% url 'eliminar_producto' producto.id %}" class="btn btn-outline-danger" title="Eliminar Producto">
+                <i class="fa-solid fa-trash-can"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="text-center py-5 text-muted">
+            <i class="fa-solid fa-box-open fs-1 mb-3 d-block text-black-50"></i>
+            <h5>No se encontraron productos</h5>
+            <p class="small mb-3">No hay productos que coincidan con los filtros de búsqueda aplicados.</p>
+            <a href="{% url 'crear_producto' %}" class="btn btn-sm btn-primary">
+              <i class="fa-solid fa-plus me-1"></i> Registrar Nuevo Producto
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

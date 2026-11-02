@@ -1,0 +1,117 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}{{ titulo }} - Catálogo Django{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8 col-md-10">
+    
+    <div class="card shadow-sm border-0 rounded-3">
+      <div class="card-header bg-white py-3 border-bottom">
+        <div class="d-flex align-items-center">
+          <a href="{% url 'lista_productos' %}" class="btn btn-outline-secondary btn-sm me-3">
+            <i class="fa-solid fa-arrow-left"></i>
+          </a>
+          <div>
+            <h4 class="mb-0 fw-bold text-dark">
+              {% if es_edicion %}
+                <i class="fa-solid fa-pen-to-square text-primary me-2"></i>{{ titulo }}
+              {% else %}
+                <i class="fa-solid fa-circle-plus text-success me-2"></i>{{ titulo }}
+              {% endif %}
+            </h4>
+            <small class="text-muted">Formulario basado en ModelForm (Fase 5 y 6)</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body p-4">
+        <form method="POST" novalidate>
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+              {% for error in form.non_field_errors %}
+                <div><i class="fa-solid fa-circle-xmark me-2"></i>{{ error }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="mb-3">
+            <label for="{{ form.nombre.id_for_label }}" class="form-label fw-semibold">
+              <i class="fa-solid fa-tag text-primary me-1"></i>Nombre del Producto *
+            </label>
+            {{ form.nombre }}
+            {% if form.nombre.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.nombre.errors.0 }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="{{ form.categoria.id_for_label }}" class="form-label fw-semibold">
+                <i class="fa-solid fa-folder-tree text-primary me-1"></i>Categoría *
+              </label>
+              {{ form.categoria }}
+              {% if form.categoria.errors %}
+                <div class="text-danger small mt-1">
+                  {{ form.categoria.errors.0 }}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-3">
+              <label for="{{ form.precio.id_for_label }}" class="form-label fw-semibold">
+                <i class="fa-solid fa-dollar-sign text-primary me-1"></i>Precio ($) *
+              </label>
+              {{ form.precio }}
+              {% if form.precio.errors %}
+                <div class="text-danger small mt-1">
+                  {{ form.precio.errors.0 }}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-3">
+              <label for="{{ form.existencias.id_for_label }}" class="form-label fw-semibold">
+                <i class="fa-solid fa-cubes-stacked text-primary me-1"></i>Existencias *
+              </label>
+              {{ form.existencias }}
+              {% if form.existencias.errors %}
+                <div class="text-danger small mt-1">
+                  {{ form.existencias.errors.0 }}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="{{ form.descripcion.id_for_label }}" class="form-label fw-semibold">
+              <i class="fa-solid fa-align-left text-primary me-1"></i>Descripción del Producto
+            </label>
+            {{ form.descripcion }}
+            {% if form.descripcion.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.descripcion.errors.0 }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+            <a href="{% url 'lista_productos' %}" class="btn btn-outline-secondary px-4">
+              <i class="fa-solid fa-xmark me-1"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary px-4 fw-semibold shadow-sm">
+              <i class="fa-solid fa-floppy-disk me-1"></i> {{ accion }}
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
